@@ -1,7 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(rm -rf src/mailler src/content)",
+      "Bash(ls -la data)",
+      "Bash(rm -rf data)",
+      "Bash(npm uninstall *)"
     ]
   }
 }
