@@ -1,0 +1,307 @@
+# 04-content-framework.md — ARCANA Content Framework
+
+## 1. Master Framework
+
+ทุกคอนเทนต์ของ ARCANA ควรใช้โครงสร้างนี้เป็นหลัก
+
+Hook → Problem → Why → Solution → Education → Product → Summary → CTA
+
+---
+
+## 2. Blog Framework
+
+### Structure
+
+1. H1: ชื่อบทความ
+2. Intro: เปิดด้วย Pain Point
+3. H2: ปัญหานี้สำคัญอย่างไร
+4. H2: สาเหตุหรือสิ่งที่ลูกค้าควรรู้
+5. H2: วิธีเลือกหรือวิธีดูแล
+6. H2: สินค้าที่เหมาะเป็นตัวช่วย
+7. H2: สรุป
+8. CTA
+
+### Blog Prompt
+
+เขียนบทความภาษาไทยสำหรับ ARCANA โดยใช้ข้อมูลสินค้าและ Brand Guideline นี้
+
+หัวข้อ:
+[ใส่หัวข้อ]
+
+สินค้า:
+[ใส่สินค้า]
+
+กลุ่มเป้าหมาย:
+[ใส่กลุ่มเป้าหมาย]
+
+เป้าหมายบทความ:
+ให้ความรู้ + พาไปสู่การซื้อ
+
+เงื่อนไข:
+- เริ่มจากปัญหาของลูกค้า
+- ให้ความรู้ก่อนขาย
+- ใช้ภาษาอ่านง่าย
+- หลีกเลี่ยงการกล่าวอ้างเกินจริง
+- ไม่ใช้คำว่า รักษา หายขาด เห็นผลทันที
+- ใส่ CTA ตอนท้าย
+- เหมาะสำหรับ Shopify Blog
+
+---
+
+## 3. Landing Page Framework
+
+### Structure
+
+Hero → Pain Points → Why It Matters → Product Benefits → Product Details → Reviews → FAQ → Final CTA
+
+### Section Detail
+
+#### Hero
+
+ต้องตอบ 3 คำถาม:
+- สินค้าคืออะไร
+- ช่วยลูกค้าเรื่องอะไร
+- ทำไมควรสนใจตอนนี้
+
+#### Pain Points
+
+ใช้ Bullet ที่ลูกค้ารู้สึกจริง
+
+#### Why It Matters
+
+อธิบายว่าปัญหานี้ส่งผลต่อชีวิตอย่างไร
+
+#### Product Benefits
+
+เน้น Benefit ไม่ใช่ Feature
+
+#### Product Details
+
+อธิบายคุณสมบัติสินค้าแบบเข้าใจง่าย
+
+#### Reviews
+
+ใช้รีวิวที่ดูจริง ไม่เวอร์เกินไป
+
+#### FAQ
+
+ตอบข้อสงสัยก่อนซื้อ
+
+#### Final CTA
+
+สรุปประโยชน์และชวนซื้อแบบนุ่มนวล
+
+### LP Prompt
+
+สร้าง Landing Page สำหรับสินค้า ARCANA
+
+สินค้า:
+[ชื่อสินค้า]
+
+กลุ่มเป้าหมาย:
+[กลุ่มเป้าหมาย]
+
+Pain Points:
+[ปัญหาหลัก]
+
+Benefit:
+[ประโยชน์หลัก]
+
+เงื่อนไข:
+- ใช้โครงสร้าง Hero / Pain / Benefit / Review / FAQ / CTA
+- ภาษาไทย อ่านง่าย
+- เหมาะกับ Shopify
+- ไม่ Hard Sell
+- ไม่กล่าวอ้างเกินจริง
+- CTA ชัดเจน
+
+---
+
+## 4. Facebook Content Framework
+
+### Structure
+
+Hook → Problem → Insight → Product → CTA
+
+### Post Prompt
+
+สร้างโพสต์ Facebook สำหรับ ARCANA
+
+สินค้า:
+[ชื่อสินค้า]
+
+Pain Point:
+[ปัญหา]
+
+กลุ่มเป้าหมาย:
+[กลุ่มเป้าหมาย]
+
+เป้าหมาย:
+ให้คนคลิกเข้าเว็บไซต์
+
+เงื่อนไข:
+- เปิดด้วย Hook ที่ดึงดูด
+- อ่านง่ายบนมือถือ
+- ไม่ยาวเกินไป
+- ไม่ขายแรง
+- ใส่ CTA ให้คลิกอ่านเพิ่มเติม
+
+---
+
+## 5. Instagram Framework
+
+### Structure
+
+Short Hook → Emotion → Benefit → CTA → Hashtag
+
+### IG Prompt
+
+เขียน Caption Instagram สำหรับ ARCANA
+
+สินค้า:
+[ชื่อสินค้า]
+
+Mood:
+อบอุ่น / พรีเมี่ยม / Self-care
+
+เงื่อนไข:
+- สั้นกว่า Facebook
+- อ่านง่าย
+- มีความรู้สึก
+- ใส่ Hashtag 5-10 ตัว
+- ไม่ Hard Sell
+
+---
+
+## 6. TikTok / Reels Framework
+
+### Structure
+
+0-3 sec: Hook  
+3-10 sec: Problem  
+10-20 sec: Explain  
+20-30 sec: Product  
+30-35 sec: CTA
+
+### Script Prompt
+
+เขียน TikTok Script สำหรับ ARCANA
+
+สินค้า:
+[ชื่อสินค้า]
+
+Pain Point:
+[ปัญหา]
+
+ความยาว:
+30-45 วินาที
+
+เงื่อนไข:
+- Hook ต้องดึงดูดใน 3 วินาทีแรก
+- ใช้ภาษาพูด
+- ไม่ขายแรง
+- มีคำแนะนำภาพประกอบแต่ละช่วง
+- ปิดด้วย CTA
+
+---
+
+## 7. LINE OA Framework
+
+### Structure
+
+Short Message → Benefit → Link CTA
+
+### LINE Prompt
+
+เขียนข้อความ LINE OA สำหรับ ARCANA
+
+สินค้า:
+[ชื่อสินค้า]
+
+เงื่อนไข:
+- สั้น กระชับ
+- อ่านแล้วเข้าใจทันที
+- มี CTA
+- ไม่ใช้คำขายแรงเกินไป
+
+---
+
+## 8. Email Framework
+
+### Structure
+
+Subject → Greeting → Problem → Education → Product → CTA
+
+### Email Prompt
+
+เขียน Email Marketing สำหรับ ARCANA
+
+หัวข้อ:
+[หัวข้อ]
+
+สินค้า:
+[สินค้า]
+
+กลุ่มเป้าหมาย:
+[กลุ่มเป้าหมาย]
+
+เงื่อนไข:
+- อบอุ่น
+- ให้ความรู้
+- ไม่ Hard Sell
+- มี CTA ที่ชัดเจน
+
+---
+
+## 9. Product Description Framework
+
+### Structure
+
+Product Intro → Who It Is For → Benefits → How to Use → Trust → CTA
+
+### Prompt
+
+เขียน Product Description สำหรับ Shopify
+
+สินค้า:
+[สินค้า]
+
+เงื่อนไข:
+- อ่านง่าย
+- แบ่งหัวข้อชัดเจน
+- เน้น Benefit
+- ไม่เคลมเกินจริง
+- เหมาะกับหน้า Product Page
+
+---
+
+## 10. Review / Testimonial Framework
+
+รีวิวควรดูจริง ไม่เวอร์เกินไป
+
+### Good Review Style
+
+- กระชับมือกว่าที่คิด ใส่แล้วจับไม้มั่นใจขึ้น
+- กลิ่นหอมกำลังดี ใช้ตอนทำงานแล้วรู้สึกผ่อนคลาย
+- แปรงแล้วรู้สึกปากสะอาดขึ้น ใช้แล้วมั่นใจขึ้นระหว่างวัน
+
+### Avoid
+
+- หายปวดทันที
+- ใช้แล้วโรคหาย
+- ดีที่สุดในชีวิต
+- เห็นผล 100%
+
+---
+
+## 11. Content Checklist
+
+ก่อนปล่อยคอนเทนต์ ARCANA ให้เช็ก:
+
+- เริ่มจากปัญหาหรือ Insight หรือไม่
+- มีการให้ความรู้ก่อนขายหรือไม่
+- CTA ชัดเจนหรือไม่
+- มีคำกล่าวอ้างเกินจริงหรือไม่
+- อ่านง่ายบนมือถือหรือไม่
+- โทนตรงกับ Brand หรือไม่
+- เชื่อมกับสินค้าอย่างเป็นธรรมชาติหรือไม่
