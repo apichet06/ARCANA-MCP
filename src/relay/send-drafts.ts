@@ -73,7 +73,15 @@ export async function sendDrafts(): Promise<{ sentSubjects: string[] }> {
       }
 
       if (sentUids.length > 0) {
-        await imapClient.messageDelete(sentUids, { uid: true });
+        const mailboxes = await imapClient.list();
+        const trash = mailboxes.find((box) => box.specialUse === "\\Trash");
+        if (!trash) {
+          throw new Error("ไม่พบโฟลเดอร์ Trash ในบัญชี Gmail นี้");
+        }
+        // Gmail's IMAP treats a plain \Deleted + EXPUNGE on the Drafts label as an
+        // archive, not a real delete -- the draft resurfaces later. Moving it to
+        // Trash is the only way that reliably removes it from Drafts.
+        await imapClient.messageMove(sentUids, trash.path, { uid: true });
       }
     } finally {
       lock.release();
