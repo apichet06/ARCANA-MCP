@@ -15,6 +15,14 @@ async function findDraftsMailbox(client: ImapFlow): Promise<string> {
   return drafts.path;
 }
 
+async function uidsStillPresent(client: ImapFlow, uids: number[]): Promise<number[]> {
+  const found: number[] = [];
+  for await (const message of client.fetch(uids.join(","), {}, { uid: true })) {
+    found.push(message.uid);
+  }
+  return found;
+}
+
 export async function sendDrafts(): Promise<{ sentSubjects: string[] }> {
   const user = process.env.SMTP_USER ?? "";
   const pass = process.env.SMTP_PASS ?? "";
@@ -80,8 +88,22 @@ export async function sendDrafts(): Promise<{ sentSubjects: string[] }> {
         }
         // Gmail's IMAP treats a plain \Deleted + EXPUNGE on the Drafts label as an
         // archive, not a real delete -- the draft resurfaces later. Moving it to
-        // Trash is the only way that reliably removes it from Drafts.
+        // Trash is the only way that reliably removes it from Drafts. The move
+        // itself has been observed to silently no-op on Gmail's end once in a
+        // while, so verify it actually left Drafts and retry once before giving up.
         await imapClient.messageMove(sentUids, trash.path, { uid: true });
+
+        let remaining = await uidsStillPresent(imapClient, sentUids);
+        if (remaining.length > 0) {
+          await imapClient.messageMove(remaining, trash.path, { uid: true });
+          remaining = await uidsStillPresent(imapClient, remaining);
+        }
+
+        if (remaining.length > 0) {
+          throw new Error(
+            `ส่งอีเมลสำเร็จแล้ว แต่ย้าย draft UID ${remaining.join(", ")} ไป Trash ไม่สำเร็จ ต้องลบด้วยมือ ไม่งั้นจะถูกส่งซ้ำในรอบถัดไป`,
+          );
+        }
       }
     } finally {
       lock.release();
