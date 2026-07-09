@@ -15,7 +15,7 @@ async function findDraftsMailbox(client: ImapFlow): Promise<string> {
   return drafts.path;
 }
 
-async function main() {
+export async function sendDrafts(): Promise<{ sentSubjects: string[] }> {
   const user = process.env.SMTP_USER ?? "";
   const pass = process.env.SMTP_PASS ?? "";
   const to = process.env.SENT_MAIL ?? "";
@@ -41,14 +41,15 @@ async function main() {
 
   await imapClient.connect();
 
+  const sentSubjects: string[] = [];
+
   try {
     const draftsMailbox = await findDraftsMailbox(imapClient);
     const lock = await imapClient.getMailboxLock(draftsMailbox);
 
     try {
       if (imapClient.mailbox === false || imapClient.mailbox.exists === 0) {
-        console.log("ไม่มี draft ใหม่ให้ส่ง");
-        return;
+        return { sentSubjects };
       }
 
       const sentUids: number[] = [];
@@ -67,15 +68,12 @@ async function main() {
           html,
         });
 
-        console.log(`ส่งสำเร็จ: ${subject}`);
+        sentSubjects.push(subject);
         sentUids.push(message.uid);
       }
 
       if (sentUids.length > 0) {
         await imapClient.messageDelete(sentUids, { uid: true });
-        console.log(`ลบ draft ที่ส่งแล้วออก ${sentUids.length} ฉบับ`);
-      } else {
-        console.log("ไม่มี draft ใหม่ให้ส่ง");
       }
     } finally {
       lock.release();
@@ -83,9 +81,27 @@ async function main() {
   } finally {
     await imapClient.logout();
   }
+
+  return { sentSubjects };
 }
 
-main().catch((error) => {
-  console.error("เกิดข้อผิดพลาด:", error);
-  process.exit(1);
-});
+async function main() {
+  const { sentSubjects } = await sendDrafts();
+
+  if (sentSubjects.length === 0) {
+    console.log("ไม่มี draft ใหม่ให้ส่ง");
+    return;
+  }
+
+  for (const subject of sentSubjects) {
+    console.log(`ส่งสำเร็จ: ${subject}`);
+  }
+  console.log(`ลบ draft ที่ส่งแล้วออก ${sentSubjects.length} ฉบับ`);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((error) => {
+    console.error("เกิดข้อผิดพลาด:", error);
+    process.exit(1);
+  });
+}

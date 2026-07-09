@@ -1,69 +1,81 @@
-# การตั้งค่า send-drafts.ts บน hostAtom
+# การตั้งค่า relay บน hostAtom (Plesk)
 
-สคริปต์ `src/relay/send-drafts.ts` ทำหน้าที่ดึงอีเมล draft จาก Gmail (IMAP) แล้วส่งออกจริงผ่าน SMTP จากนั้นลบ draft ที่ส่งแล้วออก ต้องรันตามรอบเวลาบนเซิร์ฟเวอร์ hostAtom เพราะ cloud routine ของ Claude ไม่ได้ส่งอีเมลออกเอง มีแค่สร้าง draft ทิ้งไว้เท่านั้น
+`src/relay/send-drafts.ts` ดึงอีเมล draft จาก Gmail (IMAP) แล้วส่งออกจริงผ่าน SMTP จากนั้นลบ draft ที่ส่งแล้วออก ต้องรันตามรอบเวลาบนเซิร์ฟเวอร์ hostAtom เพราะ cloud routine ของ Claude ไม่ได้ส่งอีเมลออกเอง มีแค่สร้าง draft ทิ้งไว้เท่านั้น
+
+hostAtom ใช้ **Plesk** (ไม่ใช่ cPanel) และ Node.js runtime ที่ Plesk ใช้รันแอปนั้นอยู่นอก jail ที่ Scheduled Tasks แบบ "Run a command" มองเห็น (เช็คแล้วไม่มี `/opt`, `/usr/local` และหา `node` ใน PATH ไม่เจอเลยจากบริบทนั้น) ดังนั้นจึงรัน `node` ตรงๆ จาก cron ไม่ได้ ต้องใช้สถาปัตยกรรมนี้แทน:
+
+```
+Plesk Scheduled Task ("Fetch a URL", ทุกวัน)
+      ↓ HTTP GET พร้อม token ลับ
+Node.js App (Passenger) รัน src/server.ts แบบ persistent
+      ↓ เรียกฟังก์ชัน sendDrafts()
+Gmail (IMAP ดึง draft) -> SMTP (ส่งจริง) -> ลบ draft
+```
+
+`src/server.ts` เป็น Express server ที่มี endpoint เดียวคือ `GET /relay/send-drafts?token=...` ตรวจ token กับ `RELAY_SECRET` ก่อนเรียก `sendDrafts()` ทุกครั้ง — endpoint นี้เปิดสู่สาธารณะผ่าน URL จริง จึงต้องมี token กันคนอื่นมายิงให้ส่งอีเมลมั่ว
 
 ## 1. อัปโหลดโค้ด
 
-อัปโหลดทั้งโปรเจกต์ (หรืออย่างน้อย `src/`, `package.json`, `package-lock.json`, `tsconfig.json`) ขึ้นไปยังพื้นที่ที่ hostAtom จัดสรรให้ เช่นผ่าน Git deploy, FTP หรือ File Manager ใน cPanel
+อัปโหลดทั้งโปรเจกต์ (`src/`, `package.json`, `package-lock.json`, `tsconfig.json`) ขึ้นไปที่ path ของแอปบน hostAtom (เช่นผ่าน Git deploy ในเมนู Node.js/Git ของ Plesk)
 
 ## 2. ติดตั้ง dependencies และ build
 
-เข้า SSH หรือ Terminal ใน cPanel แล้วรันที่ path ของโปรเจกต์:
+ผ่านปุ่ม **"Run Node.js commands"** ในหน้า Node.js panel (เพราะมันรันในบริบทที่มองเห็น Node.js runtime ของ Plesk จริง ต่างจาก Scheduled Tasks):
 
 ```bash
 npm install
 npm run build
 ```
 
-`npm run build` จะ compile TypeScript ใน `src/` ออกมาเป็น JS ที่ `dist/` (กำหนดด้วย `rootDir`/`outDir` ใน `tsconfig.json`) เช่น `dist/relay/send-drafts.js` — ทำขั้นตอนนี้ทุกครั้งที่อัปเดตโค้ดใหม่บนเซิร์ฟเวอร์
-
-ต้องติดตั้งรวม devDependencies ตอน `npm install` ด้วย (ห้ามใช้ `--production`) เพราะ `typescript` เป็น devDependency ที่ใช้ตอน build แต่หลัง build เสร็จแล้ว การรันจริงใช้แค่ `node` เปล่าๆ ไม่ต้องพึ่ง `tsx` บนเซิร์ฟเวอร์อีก
+`npm run build` compile TypeScript ใน `src/` ออกมาที่ `dist/` (กำหนดด้วย `rootDir`/`outDir` ใน `tsconfig.json`) ทำซ้ำทุกครั้งที่อัปเดตโค้ด ต้องติดตั้งรวม devDependencies ด้วย (ห้ามใช้ `--production`) เพราะ `typescript` เป็น devDependency ที่ใช้ตอน build
 
 ## 3. สร้างไฟล์ .env บนเซิร์ฟเวอร์
 
-สร้างไฟล์ `.env` ที่ root ของโปรเจกต์บน hostAtom (ไฟล์นี้ห้าม commit ขึ้น git) ใส่ค่าจริง:
+สร้างไฟล์ `.env` ที่ root ของโปรเจกต์บน hostAtom (ห้าม commit ขึ้น git):
 
 ```
 SMTP_HOST=...
 SMTP_PORT=...
 SMTP_USER=...
 SMTP_PASS=...
-FROM_NAME=Arcana
+FROM_NAME=Arcana Content
 SENT_MAIL=...
+RELAY_SECRET=...
 ```
 
 - `SMTP_USER` / `SMTP_PASS` ต้องเป็นบัญชี Gmail เดียวกับที่ Gmail MCP connector ใช้สร้าง draft (ใช้ App Password ของ Gmail ถ้าเปิด 2FA อยู่ ไม่ใช่รหัสผ่านจริง)
-- `SENT_MAIL` คือปลายทางที่จะส่งอีเมลออกจริง
+- `SENT_MAIL` คือปลายทางที่จะส่งอีเมลออกจริง (ใส่ได้หลายที่อยู่ คั่นด้วย comma)
+- `RELAY_SECRET` เป็นค่าลับที่คิดเองยาวๆ แบบสุ่ม ใช้ค่าเดียวกับที่จะใส่ใน URL ของ Scheduled Task ด้านล่าง
 
-## 4. ตั้ง Cron Job ใน cPanel
+## 4. ตั้งค่า Node.js App ใน Plesk
 
-ไปที่เมนู **Cron Jobs** ใน cPanel ของ hostAtom แล้วเพิ่มรายการใหม่:
+ในหน้า **Node.js** ของโดเมน:
 
-- **ความถี่:** ทุก 15-30 นาที เช่น `*/15 * * * *`
-- **คำสั่ง:**
-  ```bash
-  cd /home/USERNAME/path/to/arcana-mcp && /usr/bin/node dist/relay/send-drafts.js >> /home/USERNAME/logs/send-drafts.log 2>&1
-  ```
-  (เทียบเท่ากับ `npm start` เพราะ script `start` ใน package.json ชี้ไปที่ `dist/relay/send-drafts.js` เหมือนกัน — เรียก `node` ตรงๆ ในบรรทัด cron จะเสถียรกว่าเพราะไม่ต้องพึ่งพา `npm` resolve PATH ทุกรอบ)
+- **Enable Node.js** (ถ้าปิดอยู่ ให้กด Enable กลับ)
+- **Application Startup File:** `dist/server.js`
+- กด **Restart App** หลังแก้ค่าใดๆ
 
-**อย่าใช้ `npm run send-drafts` บนเซิร์ฟเวอร์จริง** — script นั้นรันผ่าน `tsx` (compile สดทุกครั้ง) ซึ่งเปลืองและช้ากว่า ใช้เฉพาะตอน dev บนเครื่องตัวเองเท่านั้น บนเซิร์ฟเวอร์ให้ build ครั้งเดียวแล้วรัน `dist/relay/send-drafts.js` ที่ compile ไว้แล้วซ้ำๆ ผ่าน cron
+แอปนี้ต้อง `listen()` ค้างไว้ตลอด (ไม่ใช่สคริปต์ที่รันจบแล้วออกแบบเดิม) — `src/server.ts` เขียนไว้ให้ทำงานแบบนี้อยู่แล้ว จึงไม่มีปัญหา Passenger คิดว่าแอป crash แล้ว restart วนซ้ำเหมือนตอนใช้ `send-drafts.js` เป็น startup file ตรงๆ
 
-แก้ `USERNAME`, path ของโปรเจกต์ และ path ของ `npm`/`node` ให้ตรงกับที่ hostAtom ใช้จริง (เช็คด้วย `which npm` และ `which node` ทาง SSH)
+ทดสอบว่าแอปขึ้นจริง เปิด `https://arcana-mcp.system-samt.com/relay/send-drafts?token=<ใส่ RELAY_SECRET จริง>` ในเบราว์เซอร์ ควรได้ JSON กลับมา เช่น `{"sent":0,"subjects":[]}` (ถ้าไม่มี draft ใหม่) — ถ้าใส่ token ผิดจะได้ `401 {"error":"unauthorized"}`
 
-## 5. ทดสอบก่อนปล่อยรัน cron จริง
+## 5. ตั้ง Scheduled Task แบบ "Fetch a URL"
 
-รันคำสั่งด้วยมือก่อนหนึ่งครั้งเพื่อดูว่าไม่มี error:
+ในเมนู **Scheduled Tasks** ของโดเมน เพิ่มรายการใหม่:
 
-```bash
-npm run build && npm start
-```
+- **Task type:** Fetch a URL (ไม่ใช่ "Run a command" หรือ "Run a PHP script")
+- **URL:** `https://arcana-mcp.system-samt.com/relay/send-drafts?token=<RELAY_SECRET เดียวกับใน .env>`
+- **Run:** Daily เวลาหลัง 09:00 น. เล็กน้อย เช่น 10:00 (เผื่อเวลาให้ cloud routine สร้าง draft เสร็จก่อน)
+- **Notify:** เลือก "Errors only" จะได้รู้ทันทีถ้า endpoint ตอบ error/401
 
-ถ้าไม่มี draft ใหม่จะขึ้น `ไม่มี draft ใหม่ให้ส่ง` ถ้ามี draft จะเห็น `ส่งสำเร็จ: <หัวข้อ>` ต่อฉบับ แล้ว draft นั้นจะถูกลบออกจาก Gmail
+กด **Run Now** ทดสอบหนึ่งครั้งก่อนเชื่อว่าใช้งานได้จริง
 
 ## ลำดับการทำงานทั้งระบบ
 
 ```
 09:00 (จ-ส) Anthropic cloud routine อ่าน knowledge base -> สร้าง Gmail draft
       ↓
-ทุก 15-30 นาที hostAtom cron -> ดึง draft (IMAP) -> ส่งจริง (SMTP) -> ลบ draft
+10:00 (ทุกวัน) Plesk Scheduled Task ("Fetch a URL") -> ยิง /relay/send-drafts?token=...
+      ↓
+Node.js App (Passenger, persistent) -> ดึง draft (IMAP) -> ส่งจริง (SMTP) -> ลบ draft
 ```
